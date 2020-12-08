@@ -1,0 +1,42 @@
+{% extends 'data_enrichment/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
+    <br />
+    <br />
+    <p style="float:left">Upload data for enrichment </p>
+    <p style="float:right"><a href="{% url 'upload' %}">Add Data</a></p>
+    <br />
+    <br />
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">File name</th>
+          <th scope="col">Upload date</th>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in uploaded_files %}
+          <tr>
+            <form action="{% url 'delete' file.id %}" method="post" class="site-form">
+                {% csrf_token %}
+                <td>{{ file.document }}</td>
+                <td>{{ file.uploaded_at }}</td>
+                <td>
+                  <button type="submit">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+            </form>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-2"></div>
+</div>
+{% endblock %}
