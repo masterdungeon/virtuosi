@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from . models import Rules, RuleCondition, GenericTags
+from .models import Rules, RuleCondition, GenericTags
 
 
 class RuleConditionInline(admin.TabularInline):

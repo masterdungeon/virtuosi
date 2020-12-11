@@ -1,4 +1,4 @@
 Django==3.1
 psycopg2==2.8.6
-xlrd
+xlrd==1.2.0
 xlwt
