@@ -1,0 +1,51 @@
+{% extends 'data_enrichment/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
+    <br />
+    <br />
+    <h3 style="text-align: center;">Rules for data for enrichment </h3>
+    <br />
+    <br />
+    {%for element in data %}
+    <div class="row" style="border: 1px solid black; padding: 10px 10px 10px 10px;margin-bottom: 10px;">
+      <p><b>Rule:</b> {{ element.rule_name }} </p>
+      <p><b>Description:</b> {{ element.rule_desc }} </p>
+      <table class="table table-sm table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Field</th>
+            <th scope="col">Value From</th>
+            <th scope="col">Value To</th>
+            <th scope="col">Tag</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rule in element.rule_conditions %}
+          <tr>
+            <td>{{ rule.field }}</td>
+            <td>{{ rule.value_from }}</td>
+            <td>{{ rule.value_to }}</td>
+            <td>{{ rule.tag }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div style="align-items: center;">
+        <form action="{% url 'rule_run' element.rule_id %}" method="post">
+          {% csrf_token %}
+          <button type="submit">
+            <i class="fa fa-play"></i>
+          </button>
+          </td>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="col-md-2"></div>
+</div>
+{% endblock %}

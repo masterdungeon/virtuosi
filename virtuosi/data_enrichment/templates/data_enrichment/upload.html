@@ -2,11 +2,20 @@
 {% load static %}
 
 {% block content %}
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Upload</button>
-</form>
-
-<p><a href="{% url 'index' %}">Return to home</a></p>
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8" style="text-align: center">
+    <br />
+    <br />
+    <h4>File Upload for Data Enrichment</h4>
+    <br />
+    <br />
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_table }}
+      <button type="submit">Upload</button>
+    </form>
+  </div>
+  <div class="col-md-2"></div>
+</div>
 {% endblock %}

@@ -12,8 +12,39 @@ class Lines(models.Model):
 	purchase_order_line = models.FloatField()
 	supplier_name = models.CharField(max_length=256)
 	spend = models.FloatField()
+	group_name = models.CharField(max_length=256)
+	supplier_tag = models.CharField(max_length=256)
 
 
 class Rules(models.Model):
     rule_name = models.CharField(max_length=256)
     rule_desc = models.TextField()
+
+    def __str__(self):
+        return self.rule_name
+
+
+class RuleCondition(models.Model):
+	rule_id = models.ForeignKey(Rules, on_delete=models.CASCADE)
+	field = models.CharField(max_length=256)
+	value_from = models.IntegerField()
+	value_to = models.IntegerField()
+	tag = models.CharField(max_length=256)
+
+
+class RuleRunTrack(models.Model):
+    rule_id = models.ForeignKey(Rules, on_delete=models.CASCADE)
+    column_name = models.CharField(max_length=256)
+
+
+class GenericTags(models.Model):
+	tag = models.CharField(max_length=256)
+	value_from = models.IntegerField()
+	value_to = models.IntegerField()
+
+	def __str__(self):
+		return self.tag
+
+	def save(self, *args, **kwargs):
+	   if MyModel.objects.all().count() :
+	      return super(MyModel,self).save(*args,**kwargs)

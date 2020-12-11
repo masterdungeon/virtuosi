@@ -9,6 +9,7 @@
     <br />
     <p style="float:left">Upload data for enrichment </p>
     <p style="float:right"><a href="{% url 'upload' %}">Add Data</a></p>
+    <p style="float:right"><a href="{% url 'template' %}">Download the import template</a>&nbsp;&nbsp;</p>
     <br />
     <br />
     <table class="table table-striped">
@@ -24,7 +25,7 @@
           <tr>
             <form action="{% url 'delete' file.id %}" method="post" class="site-form">
                 {% csrf_token %}
-                <td>{{ file.document }}</td>
+                <td>{{ file.file_name }}</td>
                 <td>{{ file.uploaded_at }}</td>
                 <td>
                   <button type="submit">
