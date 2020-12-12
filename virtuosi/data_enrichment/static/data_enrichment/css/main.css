@@ -1,0 +1,22 @@
+.asteriskField {
+  display: none;
+}
+.errorlist{
+  display: none;
+}
+body{
+  overflow-x: hidden;
+}
+#delete_icon{
+  color: red;
+}
+.navbar{
+  border-block: 2px solid #bbbcbf;
+}
+.navbar-nav > li{
+  padding-left:20px;
+  padding-right:20px;
+}
+#navbarResponsive{
+  justify-content: center
+}

@@ -16,16 +16,17 @@ from .forms import DocumentForm
 
 
 class IndexView(View):
+
     def get(self, request):
         """Return the home page."""
-
-        response = render(request, "data_enrichment/index.html", {})
-        return response
+        return redirect("list")
 
 
 class ListView(View):
+
     def get(self, request):
         """Return the document list view page."""
+
         records = Document.objects.all()
         uploaded_files = []
         for record in records:
@@ -47,14 +48,17 @@ class ListView(View):
 
 
 class UploadDocumentView(View):
+
     def get(self, request):
         """Return the document upload page."""
+
         form = DocumentForm(request.POST, request.FILES)
         response = render(request, "data_enrichment/upload.html", {"form": form})
         return response
 
     def post(self, request):
-        """ """
+        """Return upload page with saving current upaloaded file in document."""
+
         form = DocumentForm(request.POST, request.FILES)
         MEDIA_PATH = settings.MEDIA_ROOT
         if form.is_valid():
@@ -84,15 +88,20 @@ class UploadDocumentView(View):
 
 
 class DeleteView(View):
+
     def post(self, request, pk):
         """Return the document delete view page."""
+
         record = get_object_or_404(Document, pk=pk)
         record.delete()
         return redirect("list")
 
 
 class RulesView(View):
+
     def get(self, request):
+        """Return the view of Rules and Rule Conditions."""
+
         data = []
         for rule in Rules.objects.all():
             conditions = RuleCondition.objects.filter(rule_id=rule.id)
@@ -109,19 +118,22 @@ class RulesView(View):
 
 
 class RuleRunView(View):
+
     def post(self, request, pk):
+        """Return rules page with applying current rule and tag on all documents."""
+
         rule = Rules.objects.filter(id=pk).first()
         conditions = RuleCondition.objects.filter(rule_id=pk)
         column_name = rule.rule_name
         documents = Document.objects.all()
         for document in documents:
             data = []
-            gorupby = (
+            groupby = (
                 Lines.objects.filter(document_id=document.id)
                 .values("supplier_name")
                 .annotate(total_price=Sum("spend"))
             )
-            for idx, item in enumerate(gorupby):
+            for idx, item in enumerate(groupby):
                 query = (
                     "select * from data_enrichment_generictags where %s >= value_from and %s <= value_to;"
                     % (item["total_price"], item["total_price"])
@@ -160,7 +172,10 @@ class RuleRunView(View):
 
 
 class TemplateView(View):
+
     def get(self, request):
+        """Return the direct download of uploading file excel format."""
+
         response = HttpResponse(content_type="application/ms-excel")
         response["Content-Disposition"] = 'attachment; filename="format.xlsx"'
         wb = xlwt.Workbook(encoding="utf-8")
@@ -175,7 +190,10 @@ class TemplateView(View):
 
 
 class DownloadView(View):
+
     def get(self, request):
+        """Return the direct download of zip file that contains all output excel file."""
+
         try:
             track = RuleRunTrack.objects.latest("id")
         except RuleRunTrack.DoesNotExist:
@@ -187,6 +205,7 @@ class DownloadView(View):
         zip_filename = "%s.zip" % zip_subdir
         s = BytesIO()
         zf = zipfile.ZipFile(s, "w")
+        tags_count = len(GenericTags.objects.all())
         for record in records:
             filename = str(record.document).split("/")[1].split(".")[0]
             filename = filename + "_" + track.rule_id.rule_name
@@ -200,8 +219,9 @@ class DownloadView(View):
                 "Supplier Name",
                 "Spend",
                 track.column_name,
-                "Supplier Tag",
             ]
+            if tags_count:
+                columns.append("Supplier Tag")
             for col_num in range(len(columns)):
                 ws.write(row_num, col_num, columns[col_num], font_style)
             lines = Lines.objects.filter(document_id=record.id).order_by("id")
@@ -211,7 +231,8 @@ class DownloadView(View):
                 ws.write(idx + 1, 2, line.supplier_name, font_style)
                 ws.write(idx + 1, 3, line.spend, font_style)
                 ws.write(idx + 1, 4, line.group_name, font_style)
-                ws.write(idx + 1, 5, line.supplier_tag, font_style)
+                if tags_count:
+                    ws.write(idx + 1, 5, line.supplier_tag, font_style)
             file_name = filename + ".xlsx"
             wb.save(file_name)
             zip_path = os.path.join(zip_subdir, file_name)

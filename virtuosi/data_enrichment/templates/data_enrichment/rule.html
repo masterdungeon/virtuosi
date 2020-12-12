@@ -37,7 +37,7 @@
       <div style="align-items: center;">
         <form action="{% url 'rule_run' element.rule_id %}" method="post">
           {% csrf_token %}
-          <button type="submit">
+          <button type="submit" class="btn">
             <i class="fa fa-play"></i>
           </button>
           </td>

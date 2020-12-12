@@ -7,12 +7,12 @@
   <div class="col-md-8">
     <br />
     <br />
-    <p style="float:left">Upload data for enrichment </p>
-    <p style="float:right"><a href="{% url 'upload' %}">Add Data</a></p>
-    <p style="float:right"><a href="{% url 'template' %}">Download the import template</a>&nbsp;&nbsp;</p>
+    <h4 style="float:left">Upload data for enrichment </h4>
+    <a style="float:right;margin-block: -10px;" class="btn btn-primary" href="{% url 'upload' %}">Add Data</a>
+    <p style="float:right"><a href="{% url 'template' %}"><i>Download the import template</i></a>&nbsp;&nbsp;</p>
     <br />
     <br />
-    <table class="table table-striped">
+    <table class="table">
       <thead>
         <tr>
           <th scope="col">File name</th>
@@ -28,8 +28,8 @@
                 <td>{{ file.file_name }}</td>
                 <td>{{ file.uploaded_at }}</td>
                 <td>
-                  <button type="submit">
-                    <i class="fa fa-trash"></i>
+                  <button type="submit" class="btn btn-link">
+                    <i class="fa fa-trash" id="delete_icon"></i>
                   </button>
                 </td>
             </form>
