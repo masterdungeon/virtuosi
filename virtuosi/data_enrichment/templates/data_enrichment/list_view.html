@@ -26,7 +26,7 @@
             <form action="{% url 'delete' file.id %}" method="post" class="site-form">
                 {% csrf_token %}
                 <td>{{ file.file_name }}</td>
-                <td>{{ file.uploaded_at }}</td>
+                <td>{{ file.uploaded_at|date:'d S M Y' }}</td>
                 <td>
                   <button type="submit" class="btn btn-link">
                     <i class="fa fa-trash" id="delete_icon"></i>
