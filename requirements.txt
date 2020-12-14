@@ -4,3 +4,4 @@ xlrd==1.2.0
 xlwt
 gunicorn
 django-heroku
+django-crispy-forms

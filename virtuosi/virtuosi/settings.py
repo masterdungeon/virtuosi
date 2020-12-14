@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'data_enrichment',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -132,3 +133,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Heroku Settings
 django_heroku.settings(locals())
+
+# CRISPY FORMS Settings
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

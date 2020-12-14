@@ -25,6 +25,7 @@ class Rules(models.Model):
 
     rule_name = models.CharField(max_length=256)
     rule_desc = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.rule_name

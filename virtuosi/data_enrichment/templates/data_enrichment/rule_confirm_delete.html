@@ -1,0 +1,8 @@
+{% extends 'data_enrichment/base.html' %}
+{% block content %}
+
+<form method="post">{% csrf_token %}
+  <input type="submit" value="Submit" />
+</form>
+
+{% endblock %}

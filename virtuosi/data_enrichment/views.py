@@ -9,10 +9,11 @@ from django.views import View
 from django.http import Http404, HttpResponse
 from django.conf import settings
 from django.db.models import Count, Sum
+from django.forms.models import inlineformset_factory
 
 from .models import Document, Lines, Rules, RuleCondition, RuleRunTrack
 from .models import GenericTags
-from .forms import DocumentForm
+from .forms import DocumentForm, RulesView, RuleConditionForm
 
 
 class IndexView(View):
@@ -97,78 +98,78 @@ class DeleteView(View):
         return redirect("list")
 
 
-class RulesView(View):
+# class RulesView(View):
 
-    def get(self, request):
-        """Return the view of Rules and Rule Conditions."""
+#     def get(self, request):
+#         """Return the view of Rules and Rule Conditions."""
 
+#         data = []
+#         for rule in Rules.objects.all():
+#             conditions = RuleCondition.objects.filter(rule_id=rule.id)
+#             data.append(
+#                 {
+#                     "rule_id": rule.id,
+#                     "rule_name": rule.rule_name,
+#                     "rule_desc": rule.rule_desc,
+#                     "rule_conditions": conditions,
+#                 }
+#             )
+#         response = render(request, "data_enrichment/rule.html", {"rules": Rules.objects.all()})
+#         return response
+
+
+# class RuleRunView(View):
+
+def rule_run(request, pk):
+    """Return rules page with applying current rule and tag on all documents."""
+
+    rule = Rules.objects.filter(id=pk).first()
+    conditions = RuleCondition.objects.filter(rule_id=pk)
+    column_name = rule.rule_name
+    documents = Document.objects.all()
+    for document in documents:
         data = []
-        for rule in Rules.objects.all():
-            conditions = RuleCondition.objects.filter(rule_id=rule.id)
-            data.append(
-                {
-                    "rule_id": rule.id,
-                    "rule_name": rule.rule_name,
-                    "rule_desc": rule.rule_desc,
-                    "rule_conditions": conditions,
-                }
+        groupby = (
+            Lines.objects.filter(document_id=document.id)
+            .values("supplier_name")
+            .annotate(total_price=Sum("spend"))
+        )
+        for idx, item in enumerate(groupby):
+            query = (
+                "select * from data_enrichment_generictags where %s >= value_from and %s <= value_to;"
+                % (item["total_price"], item["total_price"])
             )
-        response = render(request, "data_enrichment/rule.html", {"data": data})
-        return response
-
-
-class RuleRunView(View):
-
-    def post(self, request, pk):
-        """Return rules page with applying current rule and tag on all documents."""
-
-        rule = Rules.objects.filter(id=pk).first()
-        conditions = RuleCondition.objects.filter(rule_id=pk)
-        column_name = rule.rule_name
-        documents = Document.objects.all()
-        for document in documents:
-            data = []
-            groupby = (
-                Lines.objects.filter(document_id=document.id)
-                .values("supplier_name")
-                .annotate(total_price=Sum("spend"))
+            tags = GenericTags.objects.raw(
+                query,
             )
-            for idx, item in enumerate(groupby):
-                query = (
-                    "select * from data_enrichment_generictags where %s >= value_from and %s <= value_to;"
-                    % (item["total_price"], item["total_price"])
+            for tag in tags:
+                item["tag"] = tag.tag
+                data.append(
+                    {
+                        "tag": tag.tag,
+                        "supplier_name": item["supplier_name"],
+                        "total_price": item["total_price"],
+                    }
                 )
-                tags = GenericTags.objects.raw(
-                    query,
-                )
-                for tag in tags:
-                    item["tag"] = tag.tag
-                    data.append(
-                        {
-                            "tag": tag.tag,
-                            "supplier_name": item["supplier_name"],
-                            "total_price": item["total_price"],
-                        }
-                    )
-            if not data:
-                lines = Lines.objects.filter(
-                    document_id=document.id,
-                )
-                lines.update(supplier_tag='')
-            for item in data:
-                lines = Lines.objects.filter(
-                    document_id=document.id,
-                    supplier_name__contains=item["supplier_name"],
-                )
-                lines.update(supplier_tag=item["tag"])
-        RuleRunTrack.objects.create(rule_id=rule, column_name=column_name)
-        for condition in conditions:
-            group_name = str(condition.value_from) + "-" + str(condition.value_to)
+        if not data:
             lines = Lines.objects.filter(
-                spend__range=(condition.value_from, condition.value_to)
+                document_id=document.id,
             )
-            lines.update(group_name=group_name)
-        return redirect("rules")
+            lines.update(supplier_tag='')
+        for item in data:
+            lines = Lines.objects.filter(
+                document_id=document.id,
+                supplier_name__contains=item["supplier_name"],
+            )
+            lines.update(supplier_tag=item["tag"])
+    RuleRunTrack.objects.create(rule_id=rule, column_name=column_name)
+    for condition in conditions:
+        group_name = str(condition.value_from) + "-" + str(condition.value_to)
+        lines = Lines.objects.filter(
+            spend__range=(condition.value_from, condition.value_to)
+        )
+        lines.update(group_name=group_name)
+    return redirect("rules")
 
 
 class TemplateView(View):
@@ -242,3 +243,49 @@ class DownloadView(View):
         resp = HttpResponse(s.getvalue(), content_type="application/zip")
         resp["Content-Disposition"] = "attachment; filename=%s" % zip_filename
         return resp
+
+
+def rules(request):
+    response = render(request, "data_enrichment/rule.html", {"rules": Rules.objects.all()})
+    return response
+
+def rule_create(request, template_name='data_enrichment/rule_form.html'):
+    InlineFormSet = inlineformset_factory(Rules, RuleCondition, form=RuleConditionForm, extra=6)
+    form = RulesView(request.POST or None)
+    formset = InlineFormSet(request.POST or None, instance=Rules())
+    if form.is_valid() and formset.is_valid():
+        rule = form.save()
+        formset.instance = rule
+        formset.save()
+        return redirect('rules')
+    ctx = {
+        'form': form,
+        'formset': formset,
+    }
+    return render(request, template_name, ctx)
+
+def rule_update(request, pk, template_name='data_enrichment/rule_form.html'):
+    InlineFormSet = inlineformset_factory(Rules, RuleCondition, form=RuleConditionForm)
+    rule = get_object_or_404(Rules, pk=pk)
+    form = RulesView(request.POST or None, instance=rule)
+    formset = InlineFormSet(request.POST or None, instance=rule)
+    if form.is_valid() and formset.is_valid():
+        rule = form.save()
+        formset.instance = rule
+        formset.save()
+        return redirect('rules')
+    ctx = {
+        'form': form,
+        'formset': formset,
+    }
+    return render(request, template_name, ctx)
+
+def rule_delete(request, pk, template_name='data_enrichment/rule_confirm_delete.html'):
+    rule = get_object_or_404(Rules, pk=pk)
+    if request.method=='GET':
+        rule.delete()
+        return redirect('rules')
+    ctx = {
+        'rule': rule,
+    }
+    return render(request, template_name, ctx)

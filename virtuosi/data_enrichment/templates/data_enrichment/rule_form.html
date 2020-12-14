@@ -1,0 +1,51 @@
+{% extends 'data_enrichment/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
+    <br />
+    <br />
+    <form method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <br />
+      <strong>Rule Conditions<strong>
+          <table class="table table-sm">
+            {{ formset.management_form|crispy }}
+
+            {% for form in formset.forms %}
+                {% if forloop.first %}
+                    <thead>
+                    <tr>
+                        {% for field in form.visible_fields %}
+                            <th>{{ field.label|capfirst }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                {% endif %}
+                <tr class="formset_row">
+                    {% for field in form.visible_fields %}
+                        <td>
+                            {# Include the hidden fields in the form #}
+                            {% if forloop.first %}
+                                {% for hidden in form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                            {% endif %}
+                            {{ field.errors.as_ul }}
+                            {{ field }}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+          <input type="submit" value="Submit" />
+    </form>
+    <br />
+    <br />
+  </div>
+  <div class="col-md-2"></div>
+</div>
+{% endblock %}

@@ -7,44 +7,38 @@
   <div class="col-md-8">
     <br />
     <br />
-    <h3 style="text-align: center;">Rules for data for enrichment </h3>
+    <h5 style="text-align: left;">Create Rules </h5>
+    <a style="float:right;margin-block: -10px;" class="btn btn-primary" href="{% url 'rule_create' %}">Add Rules</a>
     <br />
     <br />
-    {%for element in data %}
-    <div class="row" style="border: 1px solid black; padding: 10px 10px 10px 10px;margin-bottom: 10px;">
-      <p><b>Rule:</b> {{ element.rule_name }} </p>
-      <p><b>Description:</b> {{ element.rule_desc }} </p>
-      <table class="table table-sm table-bordered">
-        <thead>
-          <tr>
-            <th scope="col">Field</th>
-            <th scope="col">Value From</th>
-            <th scope="col">Value To</th>
-            <th scope="col">Tag</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for rule in element.rule_conditions %}
-          <tr>
-            <td>{{ rule.field }}</td>
-            <td>{{ rule.value_from }}</td>
-            <td>{{ rule.value_to }}</td>
-            <td>{{ rule.tag }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <div style="align-items: center;">
-        <form action="{% url 'rule_run' element.rule_id %}" method="post">
-          {% csrf_token %}
-          <button type="submit" class="btn">
-            <i class="fa fa-play"></i>
-          </button>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Rule name</th>
+          <th scope="col">Rule creation date</th>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rule in rules %}
+        <tr>
+          <td>{{ rule.rule_name }}</td>
+          <td>{{ rule.created_at|date:'d S M Y' }}</td>
+          <td>
+            <button type="submit" class="btn">
+              <a href="{% url 'rule_edit' rule.id %}"><i style="color:gray;" class="fa fa-pencil"></i></a>
+            </button>
+            <button" type="submit" class="btn">
+              <a href="{% url 'rule_run' rule.id %}"><i style="color:black;" class="fa fa-play"></i></a>
+            </button>
+            <button type="submit" class="btn">
+              <a href="{% url 'rule_delete' rule.id %}"><i style="color:red;" class="fa fa-trash"></i></a>
+            </button>
           </td>
-        </form>
-      </div>
-    </div>
-    {% endfor %}
+          </form>
+        </tr>
+        {% endfor %}
+      </tbody>
   </div>
   <div class="col-md-2"></div>
 </div>
