@@ -1,3 +1,8 @@
+*{
+  margin: 0px;
+  padding: 0px;
+  font-size: 16px;
+}
 .asteriskField {
   display: none;
 }
@@ -20,3 +25,54 @@ body{
 #navbarResponsive{
   justify-content: center
 }
+
+.block-sidebar {
+  width: 100%;
+  height: 500px;
+  background-color: #fff;
+}
+
+.block-title {
+  font-weight: 500;
+  color: #000000;
+  /* font-size: 20px; */
+  line-height: 70px;
+
+}
+
+.submit, .cancel{
+  float: right;
+}
+
+.cancel{
+  border-color: #dce0e3!important;
+}
+
+.overback{
+  background-color: #fff;
+  left:340px;
+  /* overflow-y: scroll; */
+  height: 100%;
+  position: fixed;
+  /* position: relative; */
+  z-index: 9999999;
+  /* opacity: .8; */
+  /* margin-left: 70px; */
+  display: none;
+  }
+  .space {
+    position: fixed;
+    text-align: center;
+    z-index: 9999999;
+    width: 30%;
+    height: 150%;
+    background: #a6a2a2;
+    opacity: .8;
+    left: -54px;
+    top: -14px;
+  display: none;
+  }
+
+  .second{
+    display: none;
+  }

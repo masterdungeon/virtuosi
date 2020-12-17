@@ -24,4 +24,6 @@ urlpatterns = [
     path("rule_run/<int:pk>/", views.rule_run, name="rule_run"),
     path("template/", (TemplateView.as_view()), name="template"),
     path("download/", (DownloadView.as_view()), name="download"),
+    path("save_rule/" , views.save_rule, name='save_rule'),
+    path("save_rule_condition/" , views.save_rule_condition, name='save_rule_condition'),
 ]

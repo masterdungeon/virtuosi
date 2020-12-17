@@ -1,5 +1,6 @@
 {% extends 'data_enrichment/base.html' %}
 {% load crispy_forms_tags %}
+{% load widget_tweaks %}
 {% block content %}
 
 <div class="row">
@@ -12,7 +13,7 @@
       {{ form|crispy }}
       <br />
       <strong>Rule Conditions<strong>
-          <table class="table table-sm">
+          <table class="table table-sm form-group">
             {{ formset.management_form|crispy }}
 
             {% for form in formset.forms %}
@@ -31,11 +32,11 @@
                             {# Include the hidden fields in the form #}
                             {% if forloop.first %}
                                 {% for hidden in form.hidden_fields %}
-                                    {{ hidden }}
+                                    {{ hidden| add_class:"form-control form-control-sm" }}
                                 {% endfor %}
                             {% endif %}
                             {{ field.errors.as_ul }}
-                            {{ field }}
+                            {{ field| add_class:"form-control form-control-sm" }}
                         </td>
                     {% endfor %}
                 </tr>

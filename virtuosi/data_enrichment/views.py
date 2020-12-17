@@ -2,6 +2,7 @@ import os
 import xlrd
 import xlwt
 import zipfile
+import json
 from io import BytesIO
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -245,9 +246,20 @@ class DownloadView(View):
         return resp
 
 
-def rules(request):
-    response = render(request, "data_enrichment/rule.html", {"rules": Rules.objects.all()})
-    return response
+def rules(request, template_name='data_enrichment/rule.html'):
+    InlineFormSet = inlineformset_factory(Rules, RuleCondition, form=RuleConditionForm, extra=6)
+    form = RulesView(request.POST or None)
+    formset = InlineFormSet(request.POST or None, instance=Rules())
+    if form.is_valid() and formset.is_valid():
+        rule = form.save()
+        formset.instance = rule
+        formset.save()
+    ctx = {
+        'rules': Rules.objects.all(),
+        'form': form,
+        'formset': formset,
+    }
+    return render(request, template_name, ctx)
 
 def rule_create(request, template_name='data_enrichment/rule_form.html'):
     InlineFormSet = inlineformset_factory(Rules, RuleCondition, form=RuleConditionForm, extra=6)
@@ -256,7 +268,6 @@ def rule_create(request, template_name='data_enrichment/rule_form.html'):
     if form.is_valid() and formset.is_valid():
         rule = form.save()
         formset.instance = rule
-        formset.save()
         return redirect('rules')
     ctx = {
         'form': form,
@@ -289,3 +300,28 @@ def rule_delete(request, pk, template_name='data_enrichment/rule_confirm_delete.
         'rule': rule,
     }
     return render(request, template_name, ctx)
+
+def save_rule(request):
+    rulename = request._post['a_11']
+    ruledesc = request._post['a_12']
+    obj = Rules.objects.create(rule_name=rulename, rule_desc=ruledesc)
+    return HttpResponse(obj.id)
+
+def save_rule_condition(request):
+    rule_id = request._post['a_0']
+    rule = Rules.objects.filter(id=rule_id).first()
+    field = request._post['a_1']
+    value_from = request._post['a_2']
+    value_to = request._post['a_3']
+    tag = request._post['a_4']
+    obj = RuleCondition.objects.create(rule_id=rule, field=field,value_from=value_from,value_to=value_to,tag=tag)
+    conditions = RuleCondition.objects.filter(rule_id=rule_id)
+    f_data= [{
+        'tag': obj.tag,
+        'id': obj.id,
+    }]
+    data = {
+        'id': obj.id,
+        'data': f_data,
+    }
+    return HttpResponse(json.dumps(data))

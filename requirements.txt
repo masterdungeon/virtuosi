@@ -5,3 +5,4 @@ xlwt
 gunicorn
 django-heroku
 django-crispy-forms
+django-widget-tweaks
